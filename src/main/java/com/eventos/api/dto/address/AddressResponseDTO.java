@@ -1,6 +1,10 @@
 package com.eventos.api.dto.address;
 
+import java.util.UUID;
+
 public record AddressResponseDTO(
-                String city,
-                String uf) {
+        UUID id,
+        String city,
+        String uf,
+        UUID eventId) {
 }

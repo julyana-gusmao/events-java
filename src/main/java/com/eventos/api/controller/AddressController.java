@@ -6,13 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.eventos.api.domain.address.Address;
+import com.eventos.api.dto.address.AddressResponseDTO;
+import com.eventos.api.dto.address.AddressUpdateDTO;
 import com.eventos.api.service.AddressService;
 
 @RestController
@@ -23,15 +24,18 @@ public class AddressController {
     private AddressService addressService;
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<Address> getAddressByEvent(@PathVariable UUID eventId) {
-        Address address = addressService.getByEvent(eventId);
-        return ResponseEntity.ok(address);
+    public ResponseEntity<AddressResponseDTO> getAddressByEvent(
+            @PathVariable UUID eventId) {
+
+        return ResponseEntity.ok(addressService.getByEvent(eventId));
     }
 
-    @PutMapping("/{addressId}")
-    public ResponseEntity<Address> updateAddress(@PathVariable UUID addressId, @RequestBody Address data) {
-        Address updated = addressService.updateAddress(addressId, data);
-        return ResponseEntity.ok(updated);
+    @PatchMapping("/{addressId}")
+    public ResponseEntity<AddressResponseDTO> updateAddress(
+            @PathVariable UUID addressId,
+            @RequestBody AddressUpdateDTO data) {
+
+        return ResponseEntity.ok(addressService.updateAddress(addressId, data));
     }
 
     @DeleteMapping("/{addressId}")

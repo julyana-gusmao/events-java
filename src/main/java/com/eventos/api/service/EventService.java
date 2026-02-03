@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,12 +17,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.eventos.api.domain.coupon.Coupon;
+import com.eventos.api.domain.address.Address;
 import com.eventos.api.domain.event.Event;
-import com.eventos.api.domain.event.EventDetailsDTO;
-import com.eventos.api.domain.event.EventRequestDTO;
-import com.eventos.api.domain.event.EventResponseDTO;
+import com.eventos.api.dto.coupons.CouponResponseDTO;
+import com.eventos.api.dto.event.EventDetailsDTO;
+import com.eventos.api.dto.event.EventRequestDTO;
+import com.eventos.api.dto.event.EventResponseDTO;
+import com.eventos.api.dto.event.EventUpdateDTO;
 import com.eventos.api.exception.EventNotFoundException;
+import com.eventos.api.mapper.EventMapper;
 import com.eventos.api.repositories.EventRepository;
 
 @Service
@@ -38,16 +40,14 @@ public class EventService {
     @Autowired
     private EventRepository repository;
 
+    @Autowired
+    private EventMapper eventMapper;
+
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
 
     public Event createEvent(EventRequestDTO data) {
-        Event newEvent = new Event();
-        newEvent.setTitle(data.title());
-        newEvent.setDescription(data.description());
-        newEvent.setEventUrl(data.eventUrl());
-        newEvent.setDate(data.date());
-        newEvent.setRemote(data.remote());
+        Event newEvent = eventMapper.toEntity(data);
 
         if (data.image() != null && !data.image().isEmpty()) {
             String path = saveFile(data.image());
@@ -64,24 +64,14 @@ public class EventService {
     public List<EventResponseDTO> getUpcomingEvents(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
 
-        Page<Event> eventsPage = this.repository.findUpcomingEvents(LocalDateTime.now(), pageable);
+        Page<Event> eventsPage = repository.findUpcomingEvents(LocalDateTime.now(), pageable);
 
-        return eventsPage
-                .map(event -> new EventResponseDTO(
-                        event.getId(),
-                        event.getTitle(),
-                        event.getDescription(),
-                        event.getDate(),
-                        event.getAddress() != null ? event.getAddress().getCity() : "",
-                        event.getAddress() != null ? event.getAddress().getUf() : "",
-                        event.getRemote(),
-                        event.getEventUrl(),
-                        event.getImgUrl()))
-                .getContent();
+        return eventMapper.toDTOList(eventsPage.getContent());
     }
 
     public List<EventResponseDTO> getFilteredEvents(int page, int size, String title, String city, String uf,
             LocalDateTime startDate, LocalDateTime endDate) {
+
         title = (title != null) ? title : "";
         city = (city != null) ? city : "";
         uf = (uf != null) ? uf : "";
@@ -90,59 +80,45 @@ public class EventService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Event> eventsPage = this.repository.findFilteredEvents(title, city, uf, startDate,
-                endDate,
-                pageable);
+        Page<Event> eventsPage = repository.findFilteredEvents(title, city, uf, startDate, endDate, pageable);
 
-        return eventsPage
-                .map(event -> new EventResponseDTO(
-                        event.getId(),
-                        event.getTitle(),
-                        event.getDescription(),
-                        event.getDate(),
-                        event.getAddress() != null ? event.getAddress().getCity() : "",
-                        event.getAddress() != null ? event.getAddress().getUf() : "",
-                        event.getRemote(),
-                        event.getEventUrl(),
-                        event.getImgUrl()))
-                .getContent();
+        return eventMapper.toDTOList(eventsPage.getContent());
     }
 
     public EventDetailsDTO getEventDetails(UUID eventId) {
         Event event = repository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event with id " + eventId + " not found"));
 
-        List<EventDetailsDTO.CouponDTO> couponDTOs = couponService.consultCoupons(eventId, LocalDateTime.now())
-                .stream()
-                .map(coupon -> new EventDetailsDTO.CouponDTO(
-                        coupon.getCode(),
-                        coupon.getDiscount(),
-                        coupon.getValid()))
-                .collect(Collectors.toList());
+        List<CouponResponseDTO> couponDTOs = couponService.consultCoupons(eventId, LocalDateTime.now());
 
-        return new EventDetailsDTO(
-                event.getId(),
-                event.getTitle(),
-                event.getDescription(),
-                event.getDate(),
-                event.getAddress() != null ? event.getAddress().getCity() : "",
-                event.getAddress() != null ? event.getAddress().getUf() : "",
-                event.getImgUrl(),
-                event.getEventUrl(),
-                couponDTOs);
+        return eventMapper.toDetailsDTO(event, couponDTOs);
     }
 
-    public Event updateEvent(UUID eventId, EventRequestDTO data) {
+    public Event updateEvent(UUID eventId, EventUpdateDTO dto) {
         Event event = repository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event with id " + eventId + " not found"));
 
-        event.setTitle(data.title());
-        event.setDescription(data.description());
-        event.setDate(data.date());
-        event.setEventUrl(data.eventUrl());
-        event.setRemote(data.remote());
+        eventMapper.updateEventFromDto(dto, event);
 
-        return repository.save(event);
+        if (dto.city() != null || dto.uf() != null) {
+
+            Address address = event.getAddress();
+
+            if (address == null) {
+                address = new Address();
+                address.setEvent(event);
+                event.setAddress(address);
+            }
+
+            eventMapper.updateAddressFromDto(dto, address);
+        }
+
+        if (Boolean.TRUE.equals(dto.remote())) {
+            event.setAddress(null);
+        }
+
+        Event saved = repository.save(event);
+        return repository.findById(saved.getId()).orElseThrow();
     }
 
     public void deleteEvent(UUID eventId) {
@@ -155,19 +131,10 @@ public class EventService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
         Page<Event> eventsPage = repository.findAll(pageable);
 
-        return eventsPage.stream().map(event -> new EventResponseDTO(
-                event.getId(),
-                event.getTitle(),
-                event.getDescription(),
-                event.getDate(),
-                event.getAddress() != null ? event.getAddress().getCity() : "",
-                event.getAddress() != null ? event.getAddress().getUf() : "",
-                event.getRemote(),
-                event.getEventUrl(),
-                event.getImgUrl())).collect(Collectors.toList());
+        return eventMapper.toDTOList(eventsPage.getContent());
     }
 
-    public List<Coupon> getEventCoupons(UUID eventId) {
+    public List<CouponResponseDTO> getEventCoupons(UUID eventId) {
         return couponService.consultCoupons(eventId, LocalDateTime.now());
     }
 
