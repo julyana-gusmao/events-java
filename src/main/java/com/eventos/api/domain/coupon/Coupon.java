@@ -37,7 +37,7 @@ public class Coupon {
     private Integer discount;
 
     @Column(nullable = false)
-    private LocalDateTime date;
+    private LocalDateTime valid;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "event_id", nullable = false)
