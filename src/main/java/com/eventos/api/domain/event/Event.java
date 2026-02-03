@@ -36,7 +36,7 @@ public class Event {
     @Column(nullable = false, length = 255)
     private String description;
 
-    @Column(name = "img_url", nullable = false)
+    @Column(name = "img_url")
     private String imgUrl;
 
     @Column(name = "event_url", nullable = false)
