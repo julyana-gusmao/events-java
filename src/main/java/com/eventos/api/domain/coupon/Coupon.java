@@ -1,12 +1,14 @@
 package com.eventos.api.domain.coupon;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.eventos.api.domain.event.Event;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -22,17 +24,22 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Coupon {
+
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false, unique = true)
     private String code;
-    private Integer discount;
-    private Date date;
 
-    @ManyToOne
-    @JoinColumn(name = "event_id")
+    @Column(nullable = false)
+    private Integer discount;
+
+    @Column(nullable = false)
+    private LocalDateTime date;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 }
