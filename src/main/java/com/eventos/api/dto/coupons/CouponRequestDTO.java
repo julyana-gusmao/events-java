@@ -1,4 +1,4 @@
-package com.eventos.api.domain.coupon;
+package com.eventos.api.dto.coupons;
 
 import java.time.LocalDateTime;
 

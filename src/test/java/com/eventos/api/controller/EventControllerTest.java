@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.eventos.api.domain.event.Event;
-import com.eventos.api.domain.event.EventRequestDTO;
+import com.eventos.api.dto.event.EventRequestDTO;
 import com.eventos.api.service.EventService;
 import com.jayway.jsonpath.JsonPath;
 
@@ -98,7 +98,7 @@ public class EventControllerTest {
                 .param("description", "Descrição criada")
                 .param("date", LocalDateTime.now().plusDays(2).toString())
                 .param("city", "Rio de Janeiro")
-                .param("state", "RJ")
+                .param("uf", "RJ")
                 .param("remote", "true")
                 .param("eventUrl", "http://evento.com"))
                 .andExpect(status().isOk())

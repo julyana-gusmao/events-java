@@ -1,9 +1,11 @@
 package com.eventos.api.domain.event;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import com.eventos.api.domain.address.Address;
+import com.eventos.api.domain.coupon.Coupon;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -11,6 +13,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -50,4 +53,7 @@ public class Event {
 
     @OneToOne(mappedBy = "event", cascade = CascadeType.ALL)
     private Address address;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Coupon> coupons;
 }

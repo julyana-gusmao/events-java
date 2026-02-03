@@ -1,16 +1,16 @@
-package com.eventos.api.domain.event;
+package com.eventos.api.dto.event;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-public record EventResponseDTO(
-        UUID id,
+import org.springframework.web.multipart.MultipartFile;
+
+public record EventRequestDTO(
         String title,
         String description,
         LocalDateTime date,
         String city,
-        String state,
+        String uf,
         Boolean remote,
         String eventUrl,
-        String imgUrl) {
+        MultipartFile image) {
 }
