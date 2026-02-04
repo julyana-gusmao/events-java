@@ -45,7 +45,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         Address a1 = new Address();
         a1.setCity("São Paulo");
-        a1.setUf("SP");
+        a1.setState("SP");
         a1.setEvent(e1);
         addressRepository.save(a1);
 
@@ -67,7 +67,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         Address a2 = new Address();
         a2.setCity("Rio de Janeiro");
-        a2.setUf("RJ");
+        a2.setState("RJ");
         a2.setEvent(e2);
         addressRepository.save(a2);
 
@@ -89,7 +89,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         Address a3 = new Address();
         a3.setCity("Belo Horizonte");
-        a3.setUf("MG");
+        a3.setState("MG");
         a3.setEvent(e3);
         addressRepository.save(a3);
 

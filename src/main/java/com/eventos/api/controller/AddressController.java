@@ -17,7 +17,7 @@ import com.eventos.api.dto.address.AddressUpdateDTO;
 import com.eventos.api.service.AddressService;
 
 @RestController
-@RequestMapping("/api/address")
+@RequestMapping("/api/v1/address")
 public class AddressController {
 
     @Autowired

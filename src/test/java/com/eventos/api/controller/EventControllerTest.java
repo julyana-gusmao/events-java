@@ -98,7 +98,7 @@ public class EventControllerTest {
                 .param("description", "Descrição criada")
                 .param("date", LocalDateTime.now().plusDays(2).toString())
                 .param("city", "Rio de Janeiro")
-                .param("uf", "RJ")
+                .param("state", "RJ")
                 .param("remote", "true")
                 .param("eventUrl", "http://evento.com"))
                 .andExpect(status().isOk())

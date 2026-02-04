@@ -33,7 +33,7 @@ public class Address {
     private String city;
 
     @Column(nullable = false, length = 2)
-    private String uf;
+    private String state;
 
     @OneToOne
     @JoinColumn(name = "event_id", nullable = false, unique = true)

@@ -35,14 +35,14 @@ public class CouponService {
         return couponMapper.toResponseDTOList(coupons);
     }
 
-    public CouponResponseDTO addCouponToEvent(UUID eventId, CouponRequestDTO couponData) {
+    public Coupon addCouponToEvent(UUID eventId, CouponRequestDTO dto) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
 
-        Coupon coupon = couponMapper.toEntity(couponData);
+        Coupon coupon = couponMapper.toEntity(dto);
         coupon.setEvent(event);
 
-        return couponMapper.toResponseDTO(couponRepository.save(coupon));
+        return couponRepository.save(coupon); // Retorna entity
     }
 
     public CouponResponseDTO updateCoupon(UUID couponId, CouponUpdateDTO data) {

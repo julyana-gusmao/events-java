@@ -33,7 +33,7 @@ public interface EventMapper {
     @Mapping(source = "event.eventUrl", target = "eventUrl")
     @Mapping(source = "coupons", target = "coupons")
     @Mapping(source = "event.address.city", target = "city")
-    @Mapping(source = "event.address.uf", target = "uf")
+    @Mapping(source = "event.address.state", target = "state")
     EventDetailsDTO toDetailsDTO(Event event, List<CouponResponseDTO> coupons);
 
     void updateEventFromDto(EventUpdateDTO dto, @MappingTarget Event event);

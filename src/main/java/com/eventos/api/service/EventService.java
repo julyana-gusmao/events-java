@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,26 +62,28 @@ public class EventService {
         return savedEvent;
     }
 
-    public List<EventResponseDTO> getUpcomingEvents(int page, int size) {
+    public List<EventResponseDTO> getFilteredEvents(
+            int page,
+            int size,
+            String status,
+            String title,
+            String city,
+            String state,
+            LocalDateTime startDate,
+            LocalDateTime endDate) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
 
-        Page<Event> eventsPage = repository.findUpcomingEvents(LocalDateTime.now(), pageable);
+        title = (title == null || title.isBlank()) ? null : "%" + title + "%";
+        city = (city == null || city.isBlank()) ? null : "%" + city + "%";
+        state = (state == null || state.isBlank()) ? null : "%" + state + "%";
 
-        return eventMapper.toDTOList(eventsPage.getContent());
-    }
+        if (startDate == null)
+            startDate = LocalDateTime.of(1970, 1, 1, 0, 0);
+        if (endDate == null)
+            endDate = LocalDateTime.of(3000, 1, 1, 0, 0);
 
-    public List<EventResponseDTO> getFilteredEvents(int page, int size, String title, String city, String uf,
-            LocalDateTime startDate, LocalDateTime endDate) {
-
-        title = (title != null) ? title : "";
-        city = (city != null) ? city : "";
-        uf = (uf != null) ? uf : "";
-        startDate = (startDate != null) ? startDate : LocalDateTime.now();
-        endDate = (endDate != null) ? endDate : LocalDateTime.now();
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<Event> eventsPage = repository.findFilteredEvents(title, city, uf, startDate, endDate, pageable);
+        Page<Event> eventsPage = repository.findFilteredEvents(
+                status, title, city, state, startDate, endDate, LocalDateTime.now(), pageable);
 
         return eventMapper.toDTOList(eventsPage.getContent());
     }
@@ -100,7 +103,7 @@ public class EventService {
 
         eventMapper.updateEventFromDto(dto, event);
 
-        if (dto.city() != null || dto.uf() != null) {
+        if (dto.city() != null || dto.state() != null) {
 
             Address address = event.getAddress();
 
@@ -125,13 +128,6 @@ public class EventService {
         Event event = repository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event with id " + eventId + " not found"));
         repository.delete(event);
-    }
-
-    public List<EventResponseDTO> getAllEvents(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
-        Page<Event> eventsPage = repository.findAll(pageable);
-
-        return eventMapper.toDTOList(eventsPage.getContent());
     }
 
     public List<CouponResponseDTO> getEventCoupons(UUID eventId) {
