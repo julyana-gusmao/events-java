@@ -68,8 +68,8 @@ Content-Type: application/json
 
 Clone o repositório e rode a aplicação com Maven:
 
-git clone https://github.com/julyana-gusmao/events-java.git
-cd events-java
+git clone https://github.com/julyana-gusmao/events-java.git  <br>
+cd events-java  <br>
 mvn spring-boot:run
 
 ---
