@@ -38,24 +38,6 @@ Ela mostra todos os endpoints disponíveis, parâmetros, request/response e exem
 
 ---
 
-## Estrutura do Projeto
-events-java/
-│
-├─ src/main/java/com/eventos/api/
-│ ├─ controller/ # Controllers REST
-│ ├─ service/ # Lógica de negócio
-│ ├─ repository/ # Repositórios JPA
-│ ├─ dto/ # Data Transfer Objects
-│ ├─ mapper/ # MapStruct mappers
-│ └─ model/ # Entidades do banco
-│
-├─ src/main/resources/
-│ ├─ application.properties # Configurações da aplicação
-│
-└─ src/test/java/ # Para testes unitários e de integração
-
----
-
 ## Exemplos de Requisição
 
 **Criar Evento**
